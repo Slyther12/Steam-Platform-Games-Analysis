@@ -27,7 +27,14 @@ jobs:
         run: |
           aws s3 sync glue/ s3://steam-analytics-aman-2026/glue-scripts/ --delete
 
-      - name: Trigger Glue Master Job
-        run: |
-          aws glue start-job-run \
-            --job-name steam-analytics-master-job-dev
+      - name: Run applications job
+        run: aws glue start-job-run --job-name steam-analytics-applications-job-dev
+
+      - name: Run reviews job
+        run: aws glue start-job-run --job-name steam-analytics-reviews-job-dev
+
+      - name: Run dimensions job
+        run: aws glue start-job-run --job-name steam-analytics-dimensions-job-dev
+
+      - name: Run master job
+        run: aws glue start-job-run --job-name steam-analytics-master-job-dev
