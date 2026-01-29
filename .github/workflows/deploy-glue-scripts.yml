@@ -4,16 +4,13 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "glue/**"
 
 jobs:
   deploy:
-    name: Upload Glue scripts
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write   # REQUIRED for OIDC
+      id-token: write
       contents: read
 
     steps:
@@ -23,9 +20,14 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: arn:aws:iam::338149548627:role/steam-analytics-github-actions-role-dev
+          aws-region: us-east-1
 
       - name: Upload Glue scripts to S3
         run: |
-          aws s3 sync glue/ s3://${{ secrets.S3_BUCKET_NAME }}/glue-scripts/ --delete
+          aws s3 sync glue/ s3://steam-analytics-aman-2026/glue-scripts/ --delete
+
+      - name: Trigger Glue Master Job
+        run: |
+          aws glue start-job-run \
+            --job-name steam-analytics-master-job-dev
