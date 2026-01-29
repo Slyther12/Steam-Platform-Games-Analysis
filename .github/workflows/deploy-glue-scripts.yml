@@ -1,0 +1,31 @@
+name: Deploy Glue Scripts to S3
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "glue/**"
+
+jobs:
+  deploy:
+    name: Upload Glue scripts
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write   # REQUIRED for OIDC
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload Glue scripts to S3
+        run: |
+          aws s3 sync glue/ s3://${{ secrets.S3_BUCKET_NAME }}/glue-scripts/ --delete
