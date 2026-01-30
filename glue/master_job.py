@@ -37,7 +37,7 @@ spark = glueContext.spark_session
 # --------------------------------------------------
 # Input paths (SILVER)
 # --------------------------------------------------
-applications_path = f"{SILVER_BASE}/bi_applications_capped/parquet/"
+applications_path = f"{SILVER_BASE}/applications/bi_applications_capped/parquet/"
 
 devs_path       = f"{SILVER_BASE}/dimensions/app_developers/"
 publishers_path = f"{SILVER_BASE}/dimensions/app_publishers/"
@@ -95,5 +95,6 @@ master_df.select(
 master_df.write.mode("overwrite").parquet(master_out_parquet)
 
 print("Master job completed successfully.")
+
 
 
