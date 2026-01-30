@@ -27,8 +27,9 @@ args = getResolvedOptions(
     ]
 )
 
-RAW_BASE = args['RAW_BASE']
-SILVER_BASE = args['SILVER_BASE']
+BUCKET = "steam-analytics-steam-analytics-aman-2026"
+RAW_BASE = f"s3://{BUCKET}/raw"
+SILVER_BASE = f"s3://{BUCKET}/silver"
 
 print(f"Starting Glue job: {args['JOB_NAME']}")
 print(f"RAW_BASE: {RAW_BASE}")
@@ -47,9 +48,7 @@ spark = glueContext.spark_session
 # Input / Output paths
 # --------------------------------------------------
 reviews_input = f"{RAW_BASE}/reviews.csv"
-
-review_out_parquet = f"{SILVER_BASE}/fact_review_level/parquet/"
-
+review_out_parquet = f"{SILVER_BASE}/reviews/bi_reviews_capped/parquet/"
 
 # --------------------------------------------------
 # Read RAW reviews CSV
@@ -161,3 +160,4 @@ review_fact_df = (
 review_fact_df.write.mode("overwrite").parquet(review_out_parquet)
 
 print("Reviews job completed successfully.")
+
