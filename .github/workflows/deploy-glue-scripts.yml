@@ -4,17 +4,18 @@ on:
   push:
     branches:
       - main
-    paths:
-      - glue/**
-      - .github/workflows/deploy-glue-scripts.yml
-
-permissions:
-  id-token: write
-  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      AWS_REGION: us-east-1
+      BUCKET_NAME: steam-analytics-steam-analytics-aman-2026
 
     steps:
       - name: Checkout repository
@@ -24,72 +25,119 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::338149548627:role/steam-analytics-github-actions-role-dev
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
-      # -------------------------------
-      # Upload Glue scripts to S3
-      # -------------------------------
       - name: Upload Glue scripts to S3
         run: |
-          aws s3 sync glue/ s3://steam-analytics-steam-analytics-aman-2026/glue-scripts/ --delete
+          aws s3 sync glue/ s3://${BUCKET_NAME}/glue-scripts/ --delete
 
-      # -------------------------------
-      # Applications job
-      # -------------------------------
+      # ---------------- APPLICATIONS JOB ----------------
       - name: Run applications job
+        id: applications
         run: |
           RUN_ID=$(aws glue start-job-run \
             --job-name steam-analytics-applications-job-dev \
             --query JobRunId --output text)
 
-          echo "Applications JobRunId=$RUN_ID"
+          echo "APPLICATIONS_RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
-          aws glue wait job-run-succeeded \
-            --job-name steam-analytics-applications-job-dev \
-            --run-id $RUN_ID
+      - name: Wait for applications job
+        run: |
+          while true; do
+            STATUS=$(aws glue get-job-run \
+              --job-name steam-analytics-applications-job-dev \
+              --run-id $APPLICATIONS_RUN_ID \
+              --query JobRun.JobRunState --output text)
 
-      # -------------------------------
-      # Reviews job
-      # -------------------------------
+            echo "Applications status: $STATUS"
+
+            if [ "$STATUS" = "SUCCEEDED" ]; then
+              break
+            elif [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "STOPPED" ]; then
+              exit 1
+            fi
+
+            sleep 30
+          done
+
+      # ---------------- REVIEWS JOB ----------------
       - name: Run reviews job
+        id: reviews
         run: |
           RUN_ID=$(aws glue start-job-run \
             --job-name steam-analytics-reviews-job-dev \
             --query JobRunId --output text)
 
-          echo "Reviews JobRunId=$RUN_ID"
+          echo "REVIEWS_RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
-          aws glue wait job-run-succeeded \
-            --job-name steam-analytics-reviews-job-dev \
-            --run-id $RUN_ID
+      - name: Wait for reviews job
+        run: |
+          while true; do
+            STATUS=$(aws glue get-job-run \
+              --job-name steam-analytics-reviews-job-dev \
+              --run-id $REVIEWS_RUN_ID \
+              --query JobRun.JobRunState --output text)
 
-      # -------------------------------
-      # Dimensions job
-      # -------------------------------
+            echo "Reviews status: $STATUS"
+
+            if [ "$STATUS" = "SUCCEEDED" ]; then
+              break
+            elif [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "STOPPED" ]; then
+              exit 1
+            fi
+
+            sleep 30
+          done
+
+      # ---------------- DIMENSIONS JOB ----------------
       - name: Run dimensions job
+        id: dimensions
         run: |
           RUN_ID=$(aws glue start-job-run \
             --job-name steam-analytics-dimensions-job-dev \
             --query JobRunId --output text)
 
-          echo "Dimensions JobRunId=$RUN_ID"
+          echo "DIMENSIONS_RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
-          aws glue wait job-run-succeeded \
-            --job-name steam-analytics-dimensions-job-dev \
-            --run-id $RUN_ID
+      - name: Wait for dimensions job
+        run: |
+          while true; do
+            STATUS=$(aws glue get-job-run \
+              --job-name steam-analytics-dimensions-job-dev \
+              --run-id $DIMENSIONS_RUN_ID \
+              --query JobRun.JobRunState --output text)
 
-      # -------------------------------
-      # Master job
-      # -------------------------------
+            echo "Dimensions status: $STATUS"
+
+            if [ "$STATUS" = "SUCCEEDED" ]; then
+              break
+            elif [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "STOPPED" ]; then
+              exit 1
+            fi
+
+            sleep 30
+          done
+
+      # ---------------- MASTER JOB ----------------
       - name: Run master job
         run: |
           RUN_ID=$(aws glue start-job-run \
             --job-name steam-analytics-master-job-dev \
             --query JobRunId --output text)
 
-          echo "Master JobRunId=$RUN_ID"
+          while true; do
+            STATUS=$(aws glue get-job-run \
+              --job-name steam-analytics-master-job-dev \
+              --run-id $RUN_ID \
+              --query JobRun.JobRunState --output text)
 
-          aws glue wait job-run-succeeded \
-            --job-name steam-analytics-master-job-dev \
-            --run-id $RUN_ID
+            echo "Master status: $STATUS"
 
+            if [ "$STATUS" = "SUCCEEDED" ]; then
+              break
+            elif [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "STOPPED" ]; then
+              exit 1
+            fi
+
+            sleep 30
+          done
