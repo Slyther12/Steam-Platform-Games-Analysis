@@ -18,8 +18,9 @@ args = getResolvedOptions(
     ]
 )
 
-RAW_BASE = args['RAW_BASE']
-SILVER_BASE = args['SILVER_BASE']
+BUCKET = "steam-analytics-steam-analytics-aman-2026"
+RAW_BASE = f"s3://{BUCKET}/raw"
+SILVER_BASE = f"s3://{BUCKET}/silver"
 
 print(f"Starting Glue job: {args['JOB_NAME']}")
 print(f"RAW_BASE: {RAW_BASE}")
@@ -56,11 +57,11 @@ platforms_path      = f"{RAW_BASE}/platforms.csv"
 # --------------------------------------------------
 # Output paths (SILVER)
 # --------------------------------------------------
-out_devs       = f"{SILVER_BASE}/app_developers/"
-out_publishers = f"{SILVER_BASE}/app_publishers/"
-out_genres     = f"{SILVER_BASE}/app_genres/"
-out_categories = f"{SILVER_BASE}/app_categories/"
-out_platforms  = f"{SILVER_BASE}/app_platforms/"
+out_devs       = f"{SILVER_BASE}/dimensions/app_developers/"
+out_publishers = f"{SILVER_BASE}/dimensions/app_publishers/"
+out_genres     = f"{SILVER_BASE}/dimensions/app_genres/"
+out_categories = f"{SILVER_BASE}/dimensions/app_categories/"
+out_platforms  = f"{SILVER_BASE}/dimensions/app_platforms/"
 
 
 # --------------------------------------------------
@@ -170,3 +171,4 @@ app_categories_agg_df.write.mode("overwrite").parquet(out_categories)
 app_platforms_agg_df.write.mode("overwrite").parquet(out_platforms)
 
 print("Dimensions job completed successfully.")
+
