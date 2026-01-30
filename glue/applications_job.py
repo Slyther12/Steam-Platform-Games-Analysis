@@ -172,11 +172,7 @@ print("Applications job completed successfully.")
 
 
 # trigger github actions run
-# trigger github actions run
-# hoja bhai
-#mc
-# teri maa ki teri
-#cvkjnkjnsdjcvsdao;csdjhio
+
 
 
 
