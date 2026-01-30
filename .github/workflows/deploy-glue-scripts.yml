@@ -29,12 +29,3 @@ jobs:
 
       - name: Run applications job
         run: aws glue start-job-run --job-name steam-analytics-applications-job-dev
-
-      - name: Run reviews job
-        run: aws glue start-job-run --job-name steam-analytics-reviews-job-dev
-
-      - name: Run dimensions job
-        run: aws glue start-job-run --job-name steam-analytics-dimensions-job-dev
-
-      - name: Run master job
-        run: aws glue start-job-run --job-name steam-analytics-master-job-dev
