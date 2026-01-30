@@ -25,7 +25,8 @@ jobs:
 
       - name: Upload Glue scripts to S3
         run: |
-          aws s3 sync glue/ s3://steam-analytics-aman-2026/glue-scripts/ --delete
+          aws s3 sync glue/ s3://steam-analytics-steam-analytics-aman-2026/glue-scripts/ --delete
+
 
       - name: Run applications job
         run: aws glue start-job-run --job-name steam-analytics-applications-job-dev
