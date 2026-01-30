@@ -1,17 +1,20 @@
-name: Deploy Glue Scripts to S3
+name: Deploy & Run Glue ETL Pipeline
 
 on:
   push:
     branches:
       - main
+    paths:
+      - glue/**
+      - .github/workflows/deploy-glue-scripts.yml
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
       - name: Checkout repository
@@ -23,10 +26,70 @@ jobs:
           role-to-assume: arn:aws:iam::338149548627:role/steam-analytics-github-actions-role-dev
           aws-region: us-east-1
 
+      # -------------------------------
+      # Upload Glue scripts to S3
+      # -------------------------------
       - name: Upload Glue scripts to S3
         run: |
           aws s3 sync glue/ s3://steam-analytics-steam-analytics-aman-2026/glue-scripts/ --delete
 
-
+      # -------------------------------
+      # Applications job
+      # -------------------------------
       - name: Run applications job
-        run: aws glue start-job-run --job-name steam-analytics-applications-job-dev
+        run: |
+          RUN_ID=$(aws glue start-job-run \
+            --job-name steam-analytics-applications-job-dev \
+            --query JobRunId --output text)
+
+          echo "Applications JobRunId=$RUN_ID"
+
+          aws glue wait job-run-succeeded \
+            --job-name steam-analytics-applications-job-dev \
+            --run-id $RUN_ID
+
+      # -------------------------------
+      # Reviews job
+      # -------------------------------
+      - name: Run reviews job
+        run: |
+          RUN_ID=$(aws glue start-job-run \
+            --job-name steam-analytics-reviews-job-dev \
+            --query JobRunId --output text)
+
+          echo "Reviews JobRunId=$RUN_ID"
+
+          aws glue wait job-run-succeeded \
+            --job-name steam-analytics-reviews-job-dev \
+            --run-id $RUN_ID
+
+      # -------------------------------
+      # Dimensions job
+      # -------------------------------
+      - name: Run dimensions job
+        run: |
+          RUN_ID=$(aws glue start-job-run \
+            --job-name steam-analytics-dimensions-job-dev \
+            --query JobRunId --output text)
+
+          echo "Dimensions JobRunId=$RUN_ID"
+
+          aws glue wait job-run-succeeded \
+            --job-name steam-analytics-dimensions-job-dev \
+            --run-id $RUN_ID
+
+      # -------------------------------
+      # Master job
+      # -------------------------------
+      - name: Run master job
+        run: |
+          RUN_ID=$(aws glue start-job-run \
+            --job-name steam-analytics-master-job-dev \
+            --query JobRunId --output text)
+
+          echo "Master JobRunId=$RUN_ID"
+
+          aws glue wait job-run-succeeded \
+            --job-name steam-analytics-master-job-dev \
+            --run-id $RUN_ID
+
