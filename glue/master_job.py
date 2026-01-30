@@ -17,8 +17,9 @@ args = getResolvedOptions(
     ]
 )
 
-SILVER_BASE = args['SILVER_BASE']
-GOLD_BASE = args['GOLD_BASE']
+BUCKET = "steam-analytics-steam-analytics-aman-2026"
+SILVER_BASE = f"s3://{BUCKET}/silver"
+GOLD_BASE = f"s3://{BUCKET}/gold"
 
 print(f"Starting Glue job: {args['JOB_NAME']}")
 print(f"SILVER_BASE: {SILVER_BASE}")
@@ -94,4 +95,5 @@ master_df.select(
 master_df.write.mode("overwrite").parquet(master_out_parquet)
 
 print("Master job completed successfully.")
+
 
