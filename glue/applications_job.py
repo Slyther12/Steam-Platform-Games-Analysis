@@ -19,13 +19,20 @@ args = getResolvedOptions(
     ]
 )
 
-RAW_BASE = args['RAW_BASE']
-SILVER_BASE = args['SILVER_BASE']
+BUCKET = "steam-analytics-steam-analytics-aman-2026"
+RAW_BASE = f"s3://{BUCKET}/raw"
+SILVER_BASE = f"s3://{BUCKET}/silver"
 
 print(f"Starting Glue job: {args['JOB_NAME']}")
 print(f"RAW_BASE: {RAW_BASE}")
 print(f"SILVER_BASE: {SILVER_BASE}")
 
+
+applications_input = f"{RAW_BASE}/applications.csv"
+
+applications_out_parquet = (
+    f"{SILVER_BASE}/applications/bi_applications_capped/parquet/"
+)
 
 # --------------------------------------------------
 # Glue Context
@@ -40,8 +47,8 @@ spark = glueContext.spark_session
 # --------------------------------------------------
 applications_input = f"{RAW_BASE}/applications.csv"
 
-bi_out_parquet = f"{SILVER_BASE}/bi_applications/parquet/"
-bi_capped_parquet = f"{SILVER_BASE}/bi_applications_capped/parquet/"
+applications_capped_parquet = f"{SILVER_BASE}/applications/bi_applications_capped/parquet/"
+applications_out_parquet = f"{SILVER_BASE}/applications/bi_applications_capped/parquet/"
 
 
 # --------------------------------------------------
@@ -158,8 +165,8 @@ bi_applications_capped_df = (
 # --------------------------------------------------
 # Write SILVER outputs (Parquet only)
 # --------------------------------------------------
-bi_applications_df.write.mode("overwrite").parquet(bi_out_parquet)
-bi_applications_capped_df.write.mode("overwrite").parquet(bi_capped_parquet)
+bi_applications_df.write.mode("overwrite").parquet(applications_out_parquet)
+bi_applications_capped_df.write.mode("overwrite").parquet(applications_capped_parquet)
 
 print("Applications job completed successfully.")
 
@@ -170,5 +177,6 @@ print("Applications job completed successfully.")
 #mc
 # teri maa ki teri
 #cvkjnkjnsdjcvsdao;csdjhio
+
 
 
