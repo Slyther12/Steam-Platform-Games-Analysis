@@ -171,9 +171,8 @@ bi_applications_capped_df.write.mode("overwrite").parquet(applications_capped_pa
 print("Applications job completed successfully.")
 
 
-# trigger github actions run
-#hello jarvis
-# hello madhura
+# grp 4 project presentation
+
 
 
 
