@@ -91,7 +91,6 @@ resource "aws_iam_role_policy_attachment" "glue_policy_attach" {
 
 
 # Allow Glue to read from the EXISTING Raw Data Bucket
-
 resource "aws_iam_role_policy" "glue_access_existing_data" {
   name = "glue-access-existing-data"
   role = aws_iam_role.glue_role.id
@@ -106,10 +105,11 @@ resource "aws_iam_role_policy" "glue_access_existing_data" {
           "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::YOUR-EXISTING-BUCKET-NAME",      # The Bucket itself
-          "arn:aws:s3:::YOUR-EXISTING-BUCKET-NAME/*"     # All files inside
+          "arn:aws:s3:::steam-analytics-steam-analytics-aman-2026",      # The Bucket itself
+          "arn:aws:s3:::steam-analytics-steam-analytics-aman-2026/*"     # All files inside
         ]
       }
     ]
   })
 }
+
