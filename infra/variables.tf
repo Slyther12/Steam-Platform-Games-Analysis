@@ -62,3 +62,8 @@ variable "athena_database_name" {
   type        = string
   default     = "steam_analytics"
 }
+
+variable "github_repo" {
+  description = "The GitHub repository (Org/Name) to trust. passed automatically by GitHub Actions."
+  type        = string
+}
