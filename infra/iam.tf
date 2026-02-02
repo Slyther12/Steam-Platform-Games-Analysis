@@ -90,7 +90,7 @@ resource "aws_iam_role_policy_attachment" "glue_policy_attach" {
 }
 
 # ---------------------------------------------------------
-# Grant Access to the EXISTING Data Bucket
+# Grant Access to the EXISTING Data Bucket (S3 + KMS)
 # ---------------------------------------------------------
 resource "aws_iam_role_policy" "glue_access_existing_data" {
   name = "glue-access-existing-data"
@@ -99,6 +99,7 @@ resource "aws_iam_role_policy" "glue_access_existing_data" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      # 1. Allow Reading Files
       {
         Sid    = "AllowReadOldBucket"
         Effect = "Allow"
@@ -107,11 +108,22 @@ resource "aws_iam_role_policy" "glue_access_existing_data" {
           "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::steam-analytics-steam-analytics-aman-2026",      # YOUR OLD BUCKET
-          "arn:aws:s3:::steam-analytics-steam-analytics-aman-2026/*"     # ALL FILES INSIDE
+          "arn:aws:s3:::steam-analytics-steam-analytics-aman-2026",
+          "arn:aws:s3:::steam-analytics-steam-analytics-aman-2026/*"
         ]
+      },
+      # 2. Allow Decrypting Files (The Missing Piece)
+      {
+        Sid    = "AllowKMSDecrypt"
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey"
+        ]
+        Resource = "*"  # Allows access to any key used by that bucket
       }
     ]
   })
 }
+
 
