@@ -2,35 +2,83 @@ name: Deploy & Run Glue ETL Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+    paths: [ "glue/**", "infra/**" ]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  deploy:
+  # --------------------------------------------------
+  # PHASE 1: Terraform (Builds & Outputs Config)
+  # --------------------------------------------------
+  terraform:
+    name: Terraform Apply
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
-      contents: read
-
-    env:
-      AWS_REGION: us-east-1
-      BUCKET_NAME: steam-analytics-steam-analytics-aman-2026
+    defaults:
+      run:
+        working-directory: ./infra
+    
+    # Expose outputs to other jobs
+    outputs:
+      bucket_name: ${{ steps.tf_out.outputs.bucket_name }}
+      role_arn:    ${{ steps.tf_out.outputs.role_arn }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+      # 1. Configure AWS (Uses Secrets for the Initial Setup)
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::338149548627:role/steam-analytics-github-actions-role-dev
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - run: terraform init
+      
+      # 2. Pass the GitHub Repo dynamically!
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve \
+            -var="github_repo=${{ github.repository }}" \
+            -var="data_bucket_name=placeholder" 
+
+      # 3. Read Outputs and save them for the next job
+      - name: Export Outputs
+        id: tf_out
+        run: |
+          echo "bucket_name=$(terraform output -raw DEPLOY_BUCKET_NAME)" >> $GITHUB_OUTPUT
+          echo "role_arn=$(terraform output -raw DEPLOY_ROLE_ARN)" >> $GITHUB_OUTPUT
+
+  # --------------------------------------------------
+  # PHASE 2: Deploy Scripts (Uses Dynamic Outputs)
+  # --------------------------------------------------
+  deploy:
+    name: Run Glue Jobs
+    runs-on: ubuntu-latest
+    needs: terraform # Waits for Phase 1
+    
+    env:
+      AWS_REGION: us-east-1
+      # DYNAMIC: Reads from Terraform!
+      BUCKET_NAME: ${{ needs.terraform.outputs.bucket_name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # DYNAMIC: Log in using the Role Terraform just created!
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ needs.terraform.outputs.role_arn }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Upload Glue scripts to S3
-        run: |
-          aws s3 sync glue/ s3://${BUCKET_NAME}/glue-scripts/ --delete
-
+      - name: Upload Glue scripts
+        run: aws s3 sync glue/ s3://${BUCKET_NAME}/glue-scripts/ --delete
+        
       # ---------------- APPLICATIONS JOB ----------------
       - name: Run applications job
         id: applications
