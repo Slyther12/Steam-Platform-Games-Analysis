@@ -1,8 +1,13 @@
 # -----------------------------
 # S3 Bucket (Data Lake)
 # -----------------------------
+resource "random_id" "bucket_suffix" {
+  byte_length = 4
+}
+
 resource "aws_s3_bucket" "data_lake" {
-  bucket = var.data_bucket_name
+  # Creates a unique name like: steam-analytics-dev-a9b3c4
+  bucket = "${var.project_name}-${var.environment}-${random_id.bucket_suffix.hex}"
 
   tags = {
     Project     = var.project_name
@@ -73,3 +78,4 @@ resource "aws_s3_object" "athena_results_prefix" {
   bucket = aws_s3_bucket.data_lake.id
   key    = "athena-results/"
 }
+
