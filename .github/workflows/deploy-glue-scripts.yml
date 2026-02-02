@@ -36,18 +36,49 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      # ---------------------------------------------------------
+      # 🛠️ NEW STEP: Auto-Create State Bucket (The Memory Fix)
+      # ---------------------------------------------------------
+      - name: Create State Bucket if Missing
+        id: create-state
+        run: |
+          # 1. Generate a unique name using your Account ID
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          STATE_BUCKET="steam-analytics-state-${ACCOUNT_ID}"
+          echo "BUCKET_NAME=${STATE_BUCKET}" >> $GITHUB_ENV
+          
+          echo "🔹 Target State Bucket: $STATE_BUCKET"
+
+          # 2. Check existence. If missing, create it.
+          if aws s3api head-bucket --bucket "$STATE_BUCKET" 2>/dev/null; then
+            echo "✅ Bucket already exists."
+          else
+            echo "🔸 Creating bucket..."
+            aws s3api create-bucket --bucket "$STATE_BUCKET" --region us-east-1
+            aws s3api put-bucket-versioning --bucket "$STATE_BUCKET" --versioning-configuration Status=Enabled
+            echo "✅ Created!"
+          fi
+
       - uses: hashicorp/setup-terraform@v3
 
-      - run: terraform init
+      # 2. Terraform Init with Dynamic Backend
+      - name: Terraform Init
+        env:
+          STATE_BUCKET: ${{ env.BUCKET_NAME }}
+        run: |
+          terraform init \
+            -backend-config="bucket=${STATE_BUCKET}" \
+            -backend-config="key=terraform.tfstate" \
+            -backend-config="region=us-east-1"
       
-      # 2. Pass the GitHub Repo dynamically!
+      # 3. Terraform Apply
       - name: Terraform Apply
         run: |
           terraform apply -auto-approve \
             -var="github_repo=${{ github.repository }}" \
             -var="data_bucket_name=placeholder" 
 
-      # 3. Read Outputs and save them for the next job
+      # 4. Read Outputs and save them for the next job
       - name: Export Outputs
         id: tf_out
         run: |
