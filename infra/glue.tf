@@ -25,7 +25,10 @@ resource "aws_glue_job" "applications_job" {
   }
 
   default_arguments = {
-    "--RAW_BASE"    = "s3://${aws_s3_bucket.data_lake.bucket}/raw"
+    # 🔴 INPUT: Read from your PERMANENT existing bucket
+    "--RAW_BASE"    = "s3://steam-analytics-steam-analytics-aman-2026/raw"
+
+    # 🟢 OUTPUT: Write to the NEW dynamic bucket (Keep this line exactly as is!)
     "--SILVER_BASE" = "s3://${aws_s3_bucket.data_lake.bucket}/silver"
     "--job-language" = "python"
   }
@@ -55,7 +58,10 @@ resource "aws_glue_job" "reviews_job" {
   }
 
   default_arguments = {
-    "--RAW_BASE"    = "s3://${aws_s3_bucket.data_lake.bucket}/raw"
+    # 🔴 INPUT: Read from your PERMANENT existing bucket
+    "--RAW_BASE"    = "s3://steam-analytics-steam-analytics-aman-2026/raw"
+
+    # 🟢 OUTPUT: Write to the NEW dynamic bucket
     "--SILVER_BASE" = "s3://${aws_s3_bucket.data_lake.bucket}/silver"
     "--job-language" = "python"
   }
@@ -85,7 +91,10 @@ resource "aws_glue_job" "dimensions_job" {
   }
 
   default_arguments = {
-    "--RAW_BASE"    = "s3://${aws_s3_bucket.data_lake.bucket}/raw"
+    # 🔴 INPUT: Read from your PERMANENT existing bucket
+    "--RAW_BASE"    = "s3://steam-analytics-steam-analytics-aman-2026/raw"
+
+    # 🟢 OUTPUT: Write to the NEW dynamic bucket
     "--SILVER_BASE" = "s3://${aws_s3_bucket.data_lake.bucket}/silver"
     "--job-language" = "python"
   }
@@ -149,3 +158,4 @@ resource "aws_glue_crawler" "gold_crawler" {
     Environment = var.environment
   }
 }
+
