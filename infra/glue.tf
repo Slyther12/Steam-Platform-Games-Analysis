@@ -25,11 +25,16 @@ resource "aws_glue_job" "applications_job" {
   }
 
   default_arguments = {
-    # 🔴 INPUT: Read from your PERMANENT existing bucket
-    "--RAW_BASE"    = "s3://steam-analytics-steam-analytics-aman-2026/raw"
+    # 🔴 INPUT 1: Raw Data (Old Bucket)
+    "--RAW_BASE"    = "s3://YOUR-EXISTING-BUCKET-NAME/raw"
 
-    # 🟢 OUTPUT: Write to the NEW dynamic bucket (Keep this line exactly as is!)
+    # 🔴 INPUT 2: Scores Data (Old Bucket - Silver Folder)
+    # REPLACE 'YOUR-EXISTING-BUCKET-NAME' with your actual bucket name
+    "--SCORES_BASE" = "s3://YOUR-EXISTING-BUCKET-NAME/silver"
+
+    # 🟢 OUTPUT: New Dynamic Bucket (Keep this exactly as is!)
     "--SILVER_BASE" = "s3://${aws_s3_bucket.data_lake.bucket}/silver"
+    
     "--job-language" = "python"
   }
 
@@ -158,4 +163,5 @@ resource "aws_glue_crawler" "gold_crawler" {
     Environment = var.environment
   }
 }
+
 
