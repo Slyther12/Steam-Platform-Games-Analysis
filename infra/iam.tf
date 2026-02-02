@@ -88,3 +88,28 @@ resource "aws_iam_role_policy_attachment" "glue_policy_attach" {
   role       = aws_iam_role.glue_role.name
   policy_arn = aws_iam_policy.glue_policy.arn
 }
+
+
+# Allow Glue to read from the EXISTING Raw Data Bucket
+
+resource "aws_iam_role_policy" "glue_access_existing_data" {
+  name = "glue-access-existing-data"
+  role = aws_iam_role.glue_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::YOUR-EXISTING-BUCKET-NAME",      # The Bucket itself
+          "arn:aws:s3:::YOUR-EXISTING-BUCKET-NAME/*"     # All files inside
+        ]
+      }
+    ]
+  })
+}
