@@ -1,6 +1,18 @@
 # .gitignore
-.terraform/
+
+# 1. Ignore the .terraform folder (This is huge and local-only)
+**/.terraform/*
+
+# 2. Ignore State Files (CRITICAL: These contain your private keys and IDs)
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
+
+# 3. Ignore Variable Files (These often contain passwords/secrets)
 *.tfvars
+*.tfvars.json
+
+# 4. Ignore Crash Logs
+crash.log
+
+# 5. Ignore System Files
 .DS_Store
