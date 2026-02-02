@@ -5,7 +5,6 @@ from pyspark.sql.functions import countDistinct, count
 from awsglue.context import GlueContext
 from awsglue.utils import getResolvedOptions
 
-
 # --------------------------------------------------
 # Glue job arguments
 # --------------------------------------------------
@@ -13,19 +12,20 @@ args = getResolvedOptions(
     sys.argv,
     [
         'JOB_NAME',
-        'RAW_BASE',
-        'SILVER_BASE'
+        'RAW_BASE',    # Passed from Terraform
+        'SILVER_BASE'  # Passed from Terraform
     ]
 )
 
-BUCKET = "steam-analytics-steam-analytics-aman-2026"
-RAW_BASE = f"s3://{BUCKET}/raw"
-SILVER_BASE = f"s3://{BUCKET}/silver"
+# --------------------------------------------------
+# DYNAMIC PATHS (The Fix)
+# --------------------------------------------------
+RAW_BASE = args['RAW_BASE']
+SILVER_BASE = args['SILVER_BASE']
 
 print(f"Starting Glue job: {args['JOB_NAME']}")
 print(f"RAW_BASE: {RAW_BASE}")
 print(f"SILVER_BASE: {SILVER_BASE}")
-
 
 # --------------------------------------------------
 # Glue Context
@@ -33,7 +33,6 @@ print(f"SILVER_BASE: {SILVER_BASE}")
 sc = SparkContext.getOrCreate()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
-
 
 # --------------------------------------------------
 # Input paths (RAW)
@@ -171,4 +170,3 @@ app_categories_agg_df.write.mode("overwrite").parquet(out_categories)
 app_platforms_agg_df.write.mode("overwrite").parquet(out_platforms)
 
 print("Dimensions job completed successfully.")
-
