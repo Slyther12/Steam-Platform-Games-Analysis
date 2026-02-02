@@ -11,7 +11,8 @@ resource "aws_iam_openid_connect_provider" "github" {
 }
 
 resource "aws_iam_role" "github_actions_role" {
-  name = "steam-analytics-github-actions-role-dev"
+  # Unique role name to avoid conflicts
+  name = "${var.project_name}-oidc-${random_id.bucket_suffix.hex}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -27,11 +28,13 @@ resource "aws_iam_role" "github_actions_role" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:Slyther12/Steam-Platform-Games-Analysis:*"
+            # DYNAMIC: Trusts whichever repo is running the action
+            "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:*"
           }
         }
       }
     ]
   })
 }
+
 
