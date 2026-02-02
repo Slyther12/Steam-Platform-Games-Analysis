@@ -105,7 +105,8 @@ resource "aws_iam_role_policy" "glue_access_existing_data" {
         Effect = "Allow"
         Action = [
           "s3:GetObject",
-          "s3:ListBucket"
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
         ]
         Resource = [
           "arn:aws:s3:::steam-analytics-steam-analytics-aman-2026",
@@ -125,5 +126,6 @@ resource "aws_iam_role_policy" "glue_access_existing_data" {
     ]
   })
 }
+
 
 
