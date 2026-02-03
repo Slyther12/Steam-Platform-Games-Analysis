@@ -147,7 +147,7 @@ resource "aws_glue_crawler" "gold_crawler" {
   role          = aws_iam_role.glue_role.arn
 
   s3_target {
-    path = "s3://${aws_s3_bucket.data_lake.bucket}/gold/"
+    path = "s3://${aws_s3_bucket.data_lake.bucket}/gold/masterdata/parquet/"
   }
 
   # Automatically add new columns if schema evolves, but only log deletions
@@ -163,3 +163,4 @@ resource "aws_glue_crawler" "gold_crawler" {
 }
 
 #name
+
