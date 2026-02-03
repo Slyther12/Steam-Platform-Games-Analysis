@@ -212,3 +212,29 @@ jobs:
 
             sleep 30
           done
+
+# ---------------- GOLD CRAWLER (ADDED) ----------------
+      - name: Run Gold Crawler
+        run: |
+          echo "Starting Gold Crawler..."
+          aws glue start-crawler --name steam-analytics-gold-crawler-dev
+
+          # Give it a moment to shift to RUNNING state
+          sleep 10
+
+          while true; do
+            STATUS=$(aws glue get-crawler \
+              --name steam-analytics-gold-crawler-dev \
+              --query Crawler.State --output text)
+
+            echo "Crawler status: $STATUS"
+
+            # Crawlers go from READY -> RUNNING -> STOPPING -> READY
+            # We wait until it returns to READY
+            if [ "$STATUS" = "READY" ]; then
+              echo "Crawler finished successfully!"
+              break
+            fi
+
+            sleep 30
+          done
