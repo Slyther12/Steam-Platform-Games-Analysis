@@ -72,10 +72,13 @@ resource "aws_iam_role_policy" "github_actions_permissions" {
           "glue:StartJobRun",
           "glue:GetJobRun",
           "glue:GetJobRuns",
-          "glue:BatchStopJobRun"
+          "glue:BatchStopJobRun",
+          "glue:StartCrawler",
+          "glue:GetCrawler"
         ]
         Resource = "*"
       }
     ]
   })
 }
+
