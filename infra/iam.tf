@@ -73,7 +73,13 @@ resource "aws_iam_policy" "glue_policy" {
           "glue:GetTable",
           "glue:GetTables",
           "glue:GetDatabase",
-          "glue:GetDatabases"
+          "glue:GetDatabases",
+          "glue:CreateTable",
+          "glue:UpdateTable",
+          "glue:DeleteTable",
+          "glue:BatchCreatePartition",
+          "glue:BatchGetPartition",
+          "glue:BatchUpdatePartition"
         ]
         Resource = "*"
       }
@@ -126,6 +132,7 @@ resource "aws_iam_role_policy" "glue_access_existing_data" {
     ]
   })
 }
+
 
 
 
