@@ -43,7 +43,7 @@ As a result:
 ## 🧱 Raw Database Architecture
 
 The raw dataset closely mirrors the Steam API structure and contains deeply nested and normalized entities.
-![Raw Database Architecture](diagrams/raw_database_architecture.png)
+![Raw Database Architecture](Diagrams/raw_database_architecture.png)
 **Key characteristics:**
 
 - Raw CSV ingestion
@@ -57,7 +57,7 @@ The raw dataset closely mirrors the Steam API structure and contains deeply nest
 
 The clean layer makes the data ready for **Analytics and ML**.
 
-![Clean Database Architecture](diagrams/cleaned_database_architecture.png)
+![Clean Database Architecture](Diagrams/cleaned_database_architecture.png)
 
 ---
 
@@ -65,7 +65,7 @@ The clean layer makes the data ready for **Analytics and ML**.
 
 SteamSAGE is designed as a **cloud-native analytics and AI solution**.
 
-![Project Architecture](diagrams/Architecture_Diagram_colored.jpeg)
+![Project Architecture](Diagrams/Architecture_Diagram_colored.jpeg)
 
 ### Architecture Overview
 
@@ -116,7 +116,7 @@ We built a **working semantic search engine** and deployed on Hugging Face.
 👉 **[SteamSAGE Semantic Search Website ](https://steamsage.vercel.app/)**
 
 ### 📸 Model Screenshot
-![Model Screenshot](diagrams/model_screenshot.jpg)
+![Model Screenshot](Diagrams/model_screenshot.jpg)
 **Capabilities:**
 
 - Search games by *meaning*, not keywords
