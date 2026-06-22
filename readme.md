@@ -2,7 +2,7 @@
 
 > **SteamSAGE** is a big data analytics and semantic search platform built on data of Steam Platform. It combines advanced analytics, and NLP-powered semantic-search to understand *how games are priced, reviewed, and experienced by players*.
 
-![SteamSAGE Logo](diagrams/SteamSAGE_logo.png)
+![SteamSAGE Logo](Diagrams/SteamSAGE_logo.png)
 ---
 
 ## 🚀 Motivation
